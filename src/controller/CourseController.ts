@@ -7,14 +7,17 @@ import { EditCourseSchema } from "../dtos/editCourse.dto"
 import { DeleteCourseSchema } from "../dtos/deleteCourse.dto"
 
 export class CourseController {
+  constructor(
+    private courseBusiness: CourseBusiness = new CourseBusiness()
+  ) { }
+
   public getCourses = async (req: Request, res: Response) => {
     try {
       const input = {
         q: req.query.q
       }
 
-      const courseBusiness = new CourseBusiness()
-      const output = await courseBusiness.getCourses(input)
+      const output = await this.courseBusiness.getCourses(input)
 
       res.status(200).send(output)
     } catch (error) {
@@ -39,8 +42,7 @@ export class CourseController {
         }
       )
 
-      const courseBusiness = new CourseBusiness()
-      const output = await courseBusiness.createCourse(input)
+      const output = await this.courseBusiness.createCourse(input)
 
       res.status(201).send(output)
     } catch (error) {
@@ -68,8 +70,7 @@ export class CourseController {
         }
       )
 
-      const courseBusiness = new CourseBusiness()
-      const output = await courseBusiness.editCourse(input)
+      const output = await this.courseBusiness.editCourse(input)
 
       res.status(200).send(output)
     } catch (error) {
@@ -94,8 +95,8 @@ export class CourseController {
         }
       )
 
-      const courseBusiness = new CourseBusiness()
-      const output = await courseBusiness.deleteCourse(input)
+
+      const output = await this.courseBusiness.deleteCourse(input)
 
       res.status(200).send(output)
     } catch (error) {

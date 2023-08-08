@@ -8,11 +8,15 @@ import { CourseDB } from "../models/Course"
 import { Course } from "../models/Course"
 
 export class CourseBusiness {
+
+  constructor(
+    private courseDatabase: CourseDatabase = new CourseDatabase()
+  ) { }
+
   public getCourses = async (input: any): Promise<GetCourseOutputDTO[]> => {
     const { q } = input
 
-    const courseDatabase = new CourseDatabase()
-    const coursesDB = await courseDatabase.findCourses(q)
+    const coursesDB = await this.courseDatabase.findCourses(q)
 
     const courses: Course[] = coursesDB.map((courseDB) => new Course(
       courseDB.id,
@@ -34,8 +38,7 @@ export class CourseBusiness {
   public createCourse = async (input: CreateCourseInputDTO): Promise<CreateCourseOutputDTO> => {
     const { id, name, lessons } = input
 
-    const courseDatabase = new CourseDatabase()
-    const courseDBExists = await courseDatabase.findCourseById(id)
+    const courseDBExists = await this.courseDatabase.findCourseById(id)
 
     if (courseDBExists) {
       throw new BadRequestError("'id' já existe")
@@ -55,7 +58,7 @@ export class CourseBusiness {
       created_at: newCourse.getCreatedAt()
     }
 
-    await courseDatabase.insertCourse(newCourseDB)
+    await this.courseDatabase.insertCourse(newCourseDB)
 
     const output: CreateCourseOutputDTO = {
       message: "Curso registrado com sucesso",
@@ -78,10 +81,7 @@ export class CourseBusiness {
       lessons
     } = input
 
-
-
-    const courseDatabase = new CourseDatabase()
-    const courseToEditDB = await courseDatabase.findCourseById(idToEdit)
+    const courseToEditDB = await this.courseDatabase.findCourseById(idToEdit)
 
     if (!courseToEditDB) {
       throw new NotFoundError("'id' para editar não existe")
@@ -105,7 +105,7 @@ export class CourseBusiness {
       created_at: course.getCreatedAt()
     }
 
-    await courseDatabase.updateCourse(idToEdit, updatedCourseDB)
+    await this.courseDatabase.updateCourse(idToEdit, updatedCourseDB)
 
     const output: EditCourseOutputDTO = {
       message: "Curso editado com sucesso",
@@ -123,8 +123,7 @@ export class CourseBusiness {
   public deleteCourse = async (input: DeleteCourseInputDTO): Promise<DeleteCourseOutputDTO> => {
     const { idToDelete } = input
 
-    const courseDatabase = new CourseDatabase()
-    const courseToDeleteDB = await courseDatabase.findCourseById(idToDelete)
+    const courseToDeleteDB = await this.courseDatabase.findCourseById(idToDelete)
 
     if (!courseToDeleteDB) {
       throw new NotFoundError("'id' para deletar não existe")
@@ -137,7 +136,7 @@ export class CourseBusiness {
       courseToDeleteDB.created_at
     )
 
-    await courseDatabase.deleteCourseById(courseToDeleteDB.id)
+    await this.courseDatabase.deleteCourseById(courseToDeleteDB.id)
 
     const output: DeleteCourseOutputDTO = {
       message: "Curso deletado com sucesso",
