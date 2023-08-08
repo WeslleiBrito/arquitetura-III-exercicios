@@ -1,11 +1,14 @@
 import { CourseDatabase } from "../database/CourseDatabase"
+import { CreateCourseInputDTO, CreateCourseOutputDTO, GetCourseOutputDTO } from "../dtos/createCourse.dto"
+import { DeleteCourseInputDTO, DeleteCourseOutputDTO } from "../dtos/deleteCourse.dto"
+import { EditCourseInputDTO, EditCourseOutputDTO } from "../dtos/editCourse.dto"
 import { BadRequestError } from "../errors/BadRequestError"
 import { NotFoundError } from "../errors/NotFoundError"
 import { CourseDB } from "../models/Course"
 import { Course } from "../models/Course"
 
 export class CourseBusiness {
-  public getCourses = async (input: any) => {
+  public getCourses = async (input: any): Promise<GetCourseOutputDTO[]> => {
     const { q } = input
 
     const courseDatabase = new CourseDatabase()
@@ -18,7 +21,7 @@ export class CourseBusiness {
       courseDB.created_at
     ))
 
-    const output = courses.map(course => ({
+    const output: GetCourseOutputDTO[] = courses.map(course => ({
       id: course.getId(),
       name: course.getName(),
       lessons: course.getLessons(),
@@ -28,28 +31,8 @@ export class CourseBusiness {
     return output
   }
 
-  public createCourse = async (input: any) => {
+  public createCourse = async (input: CreateCourseInputDTO): Promise<CreateCourseOutputDTO> => {
     const { id, name, lessons } = input
-
-    if (typeof id !== "string") {
-      throw new BadRequestError("'id' deve ser string")
-    }
-
-    if (typeof name !== "string") {
-      throw new BadRequestError("'name' deve ser string")
-    }
-
-    if (typeof lessons !== "number") {
-      throw new BadRequestError("'lessons' deve ser number")
-    }
-
-    if (name.length < 2) {
-      throw new BadRequestError("'name' deve possuir pelo menos 2 caracteres")
-    }
-
-    if (lessons <= 0) {
-      throw new BadRequestError("'lessons' não pode ser zero ou negativo")
-    }
 
     const courseDatabase = new CourseDatabase()
     const courseDBExists = await courseDatabase.findCourseById(id)
@@ -74,7 +57,7 @@ export class CourseBusiness {
 
     await courseDatabase.insertCourse(newCourseDB)
 
-    const output = {
+    const output: CreateCourseOutputDTO = {
       message: "Curso registrado com sucesso",
       course: {
         id: newCourse.getId(),
@@ -87,7 +70,7 @@ export class CourseBusiness {
     return output
   }
 
-  public editCourse = async (input: any) => {
+  public editCourse = async (input: EditCourseInputDTO): Promise<EditCourseOutputDTO> => {
     const {
       idToEdit,
       id,
@@ -95,31 +78,7 @@ export class CourseBusiness {
       lessons
     } = input
 
-    if (id !== undefined) {
-      if (typeof id !== "string") {
-        throw new BadRequestError("'id' deve ser string")
-      }
-    }
 
-    if (name !== undefined) {
-      if (typeof name !== "string") {
-        throw new BadRequestError("'name' deve ser string")
-      }
-
-      if (name.length < 2) {
-        throw new BadRequestError("'name' deve possuir pelo menos 2 caracteres")
-      }
-    }
-
-    if (lessons !== undefined) {
-      if (typeof lessons !== "number") {
-        throw new BadRequestError("'lessons' deve ser number")
-      }
-
-      if (lessons <= 0) {
-        throw new BadRequestError("'lessons' não pode ser zero ou negativo")
-      }
-    }
 
     const courseDatabase = new CourseDatabase()
     const courseToEditDB = await courseDatabase.findCourseById(idToEdit)
@@ -148,7 +107,7 @@ export class CourseBusiness {
 
     await courseDatabase.updateCourse(idToEdit, updatedCourseDB)
 
-    const output = {
+    const output: EditCourseOutputDTO = {
       message: "Curso editado com sucesso",
       course: {
         id: course.getId(),
@@ -161,7 +120,7 @@ export class CourseBusiness {
     return output
   }
 
-  public deleteCourse = async (input: any) => {
+  public deleteCourse = async (input: DeleteCourseInputDTO): Promise<DeleteCourseOutputDTO> => {
     const { idToDelete } = input
 
     const courseDatabase = new CourseDatabase()
@@ -180,7 +139,7 @@ export class CourseBusiness {
 
     await courseDatabase.deleteCourseById(courseToDeleteDB.id)
 
-    const output = {
+    const output: DeleteCourseOutputDTO = {
       message: "Curso deletado com sucesso",
       course: {
         id: course.getId(),
